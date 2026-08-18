@@ -10,8 +10,10 @@ from dotenv import load_dotenv
 # Langfuse SDK, and our own Settings all rely on this having already happened).
 load_dotenv()
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import settings
 from app.logging_config import configure_logging
@@ -29,7 +31,24 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     yield
 
 
+async def catch_unhandled_exceptions(request: Request, call_next):
+    # A plain @app.exception_handler(Exception) does NOT fix this: Starlette
+    # attaches bare-Exception handlers to the outermost ServerErrorMiddleware,
+    # which sits *outside* CORSMiddleware -- so the resulting 500 still has no
+    # Access-Control-Allow-Origin header, and the browser reports a confusing
+    # "CORS blocked" error instead of the real failure. A middleware added
+    # *before* CORSMiddleware sits inside it in the stack, so the JSONResponse
+    # it returns is still visible to CORSMiddleware afterwards.
+    try:
+        return await call_next(request)
+    except Exception:
+        logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
+        return JSONResponse(status_code=500, content={"detail": "Internal server error."})
+
+
 app = FastAPI(title="Automated Report Generator", version="0.1.0", lifespan=lifespan)
+
+app.add_middleware(BaseHTTPMiddleware, dispatch=catch_unhandled_exceptions)
 
 app.add_middleware(
     CORSMiddleware,
