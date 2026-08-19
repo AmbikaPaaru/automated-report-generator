@@ -1,11 +1,10 @@
 """Centralized application settings, loaded from environment variables / .env.
 
 We only declare here what *our own* code reads directly (DB, storage paths, logging,
-CORS, model choice). Anthropic and Langfuse credentials are also declared so
-pydantic-settings validates they're present at startup, but note the underlying
-SDKs (langchain-anthropic, langfuse) read ANTHROPIC_API_KEY / LANGFUSE_* straight
-from os.environ themselves -- python-dotenv's load_dotenv() in main.py is what
-makes that work, this Settings object doesn't have to hand those values to them.
+CORS, model choice). Langfuse credentials are also declared so pydantic-settings
+validates they're present at startup, but note the underlying SDK (langfuse) reads
+LANGFUSE_* straight from os.environ itself -- python-dotenv's load_dotenv() in
+main.py is what makes that work, this Settings object doesn't have to hand it over.
 """
 
 from pathlib import Path
@@ -17,9 +16,11 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
-    # --- Anthropic / Claude ---
-    anthropic_api_key: str
-    anthropic_model: str = "claude-opus-5"
+    # --- Internal LLM gateway (LiteLLM proxy, OpenAI-compatible) ---
+    # This is what app/agent/nodes.py's _chat_model() actually calls.
+    llm_gateway_url: str
+    llm_api_key: str
+    llm_model: str = "gpt-4o"
 
     # --- Langfuse ---
     langfuse_public_key: str | None = None

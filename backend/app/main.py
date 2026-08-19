@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     ensure_storage_dirs()
-    logger.info("Automated Report Generator backend started (model=%s)", settings.anthropic_model)
+    logger.info("Automated Report Generator backend started (model=%s via LLM gateway)", settings.llm_model)
     yield
 
 

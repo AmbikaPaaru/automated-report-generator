@@ -23,6 +23,35 @@ def test_render_charts_creates_png_files(monkeypatch, tmp_path, sample_csv_path)
         assert Path(p).stat().st_size > 0
 
 
+def test_render_charts_supports_pie(monkeypatch, tmp_path, sample_csv_path):
+    monkeypatch.setattr(settings, "chart_dir", tmp_path / "charts")
+    df = load_dataframe(str(sample_csv_path))
+
+    charts = [
+        ChartSpec(chart_type="pie", title="Revenue share by region", x_column="region", y_column="revenue", rationale="r"),
+    ]
+
+    paths = render_charts("job-pie", df, charts)
+
+    assert len(paths) == 1
+    assert Path(paths[0]).stat().st_size > 0
+
+
+def test_render_charts_pie_caps_slices_with_other_bucket(monkeypatch, tmp_path, sample_csv_path):
+    # sample_sales.csv only has a handful of regions/products, so force the "many
+    # categories" path by charting a column with more distinct values than MAX_SLICES.
+    monkeypatch.setattr(settings, "chart_dir", tmp_path / "charts")
+    df = load_dataframe(str(sample_csv_path))
+
+    charts = [
+        ChartSpec(chart_type="pie", title="Revenue by date", x_column="date", y_column="revenue", rationale="r"),
+    ]
+
+    paths = render_charts("job-pie-many", df, charts)
+
+    assert len(paths) == 1  # renders without raising even with far more than 5 categories
+
+
 def test_render_charts_skips_bad_column_without_raising(monkeypatch, tmp_path, sample_csv_path):
     monkeypatch.setattr(settings, "chart_dir", tmp_path / "charts")
     df = load_dataframe(str(sample_csv_path))

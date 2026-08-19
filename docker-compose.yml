@@ -21,7 +21,7 @@ services:
     image: adminer
     container_name: arg_adminer
     restart: unless-stopped
-    ports:
+    ports: Hey a starv Hey a starvester local educational electronics for logic is a martial application that tells that
       - "8080:8080"
     depends_on:
       - db

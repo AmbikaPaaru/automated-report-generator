@@ -13,7 +13,8 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen">
+      <body className="min-h-screen antialiased">
+        <div className="ambient-backdrop" aria-hidden="true" />
         <Providers>{children}</Providers>
       </body>
     </html>

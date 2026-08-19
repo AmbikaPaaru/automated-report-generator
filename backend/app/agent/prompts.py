@@ -1,4 +1,4 @@
-"""Prompt templates for the two Claude calls in the graph."""
+"""Prompt templates for the two LLM calls in the graph."""
 
 PLAN_ANALYSIS_SYSTEM_PROMPT = """\
 You are a senior data analyst. You are given a statistical profile of a CSV dataset \
@@ -11,10 +11,13 @@ Rules:
 - Prefer charts that reveal trends, comparisons, distributions, or relationships that are \
   actually visible in the summary statistics you were given -- do not guess at patterns you \
   cannot see in the profile.
-- Propose 3 to 5 charts, each with a real chart_type ("bar", "line", "scatter", "hist", "box") \
+- Propose 3 to 5 charts, each with a real chart_type ("bar", "line", "scatter", "hist", "box", "pie") \
   appropriate to the columns involved (e.g. "line" for a date/time x-axis, "bar" for a \
   categorical x-axis vs a numeric y-axis, "hist" or "box" for a single numeric column's \
-  distribution, "scatter" for two numeric columns).
+  distribution, "scatter" for two numeric columns, "pie" for a categorical column's share \
+  of a total). Only use "pie" when that column has a handful of distinct values (roughly \
+  6 or fewer) -- a pie chart with many thin slices is unreadable, so prefer "bar" instead \
+  once a column has many categories.
 - Write 4 to 6 insight bullets: short, concrete, and grounded in the numbers you were shown \
   (mention actual values, ranges, or counts where useful).
 """

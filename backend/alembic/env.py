@@ -20,7 +20,10 @@ from app import models  # noqa: E402,F401  # ensures Job is registered on Base.m
 config = context.config
 
 # Use our own Settings (env var / .env driven) instead of the static alembic.ini value.
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# `%%`-escape: ConfigParser applies %-interpolation to values set here, so a
+# URL-encoded password containing e.g. "%40" would otherwise raise
+# "invalid interpolation syntax" instead of being treated as a literal string.
+config.set_main_option("sqlalchemy.url", settings.database_url.replace("%", "%%"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

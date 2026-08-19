@@ -8,7 +8,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-ChartType = Literal["bar", "line", "scatter", "hist", "box"]
+ChartType = Literal["bar", "line", "scatter", "hist", "box", "pie"]
 
 
 class ChartSpec(BaseModel):

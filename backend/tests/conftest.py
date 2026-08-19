@@ -1,4 +1,4 @@
-"""Shared pytest fixtures: an isolated SQLite test DB, no live Postgres/Anthropic needed.
+"""Shared pytest fixtures: an isolated SQLite test DB, no live Postgres/LLM gateway needed.
 
 Env vars are set *before* any `app.*` module is imported so pydantic-settings picks up
 the test DB URL / dummy API key instead of whatever is in the real .env.
@@ -12,7 +12,8 @@ import pytest
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 TEST_DB_PATH = BACKEND_DIR / "tests" / "_test.db"
 
-os.environ["ANTHROPIC_API_KEY"] = "test-anthropic-key"
+os.environ["LLM_GATEWAY_URL"] = "http://test-llm-gateway.invalid"
+os.environ["LLM_API_KEY"] = "test-llm-gateway-key"
 os.environ["DATABASE_URL"] = f"sqlite:///{TEST_DB_PATH}"
 os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
 os.environ.setdefault("LANGFUSE_SECRET_KEY", "")

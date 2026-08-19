@@ -75,6 +75,20 @@ def _render_one_chart(out_dir: Path, job_id: str, index: int, df: pd.DataFrame, 
         ax.set_xlabel(spec.x_column)
         ax.set_ylabel(spec.y_column)
 
+    elif spec.chart_type == "pie":
+        grouped = df.groupby(spec.x_column)[spec.y_column].sum() if spec.y_column else df[spec.x_column].value_counts()
+        grouped = grouped.sort_values(ascending=False)
+        # A pie chart with a long tail of tiny slices is unreadable -- cap it at the top
+        # 5 categories and fold everything else into one "Other" slice, same spirit as
+        # bar's .head(15) above but tighter, since pie slices need to stay visually distinct.
+        MAX_SLICES = 5
+        if len(grouped) > MAX_SLICES:
+            other_total = grouped.iloc[MAX_SLICES:].sum()
+            grouped = grouped.head(MAX_SLICES)
+            grouped[f"Other ({len(df[spec.x_column].unique()) - MAX_SLICES} more)"] = other_total
+        ax.pie(grouped.values, labels=grouped.index.astype(str), autopct="%1.0f%%", startangle=90)
+        ax.axis("equal")  # keep it a circle, not an ellipse
+
     else:
         plt.close(fig)
         raise ValueError(f"Unsupported chart_type '{spec.chart_type}'")
