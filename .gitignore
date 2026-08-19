@@ -22,8 +22,8 @@ backend/logs/*
 # --- Env / secrets ---
 .env
 .env.*
-!.env.example
-!frontend/.env.local.example
+.env.example
+frontend/.env.local.example
 
 # --- Node / frontend ---
 node_modules/
