@@ -1,0 +1,15 @@
+.venv
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+.git
+app.db
+tests/_test.db
+storage/uploads/*
+storage/charts/*
+storage/reports/*
+!storage/**/.gitkeep
+logs/*
+.env
+.env.local
