@@ -1,4 +1,6 @@
 services:
+  # Optional: only needed if DATABASE_URL points at this container rather than an
+  # already-hosted Postgres (e.g. Supabase). Safe to leave running unused either way.
   db:
     image: postgres:16-alpine
     container_name: arg_postgres
@@ -21,10 +23,49 @@ services:
     image: adminer
     container_name: arg_adminer
     restart: unless-stopped
-    ports: Hey a starv Hey a starvester local educational electronics for logic is a martial application that tells that
+    ports:
       - "8080:8080"
     depends_on:
       - db
 
+  backend:
+    build: ./backend
+    container_name: arg_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      LLM_GATEWAY_URL: ${LLM_GATEWAY_URL}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_MODEL: ${LLM_MODEL}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      LANGFUSE_HOST: ${LANGFUSE_HOST}
+      # Must be this VM's actual reachable origin for teammates, e.g.
+      # http://arg.internal.example.com:3000 -- not localhost, or CORS blocks every
+      # browser request from anyone but you.
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN}
+    volumes:
+      - backend_storage:/app/storage
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the JS bundle at build time -- see frontend/Dockerfile's comment.
+        # Point this at wherever teammates will actually reach the backend from their
+        # own browsers (this VM's hostname:8000), not "backend" (that only resolves
+        # inside this compose network) and not localhost (that's each teammate's own
+        # machine, not this server).
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+    container_name: arg_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
 volumes:
   pgdata:
+  backend_storage:
